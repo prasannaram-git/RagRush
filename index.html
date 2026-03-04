@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>RagRush — Ragdoll Obstacle Survival Platformer | Play Free Online</title>
+  <meta name="description" content="Play RagRush free online. A physics-based ragdoll platformer with limb-detaching obstacles. Survive 60 levels, unlock characters, rush to victory.">
+  <meta name="keywords" content="ragrush, ragdoll game, platformer, obstacle game, survival, browser game, free games, physics game">
+  <meta name="author" content="IOLORD">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0a0a14">
+  <meta property="og:title" content="RagRush — Ragdoll Obstacle Survival Platformer">
+  <meta property="og:description" content="Physics-based ragdoll platformer with limb-detaching obstacles. Survive 60 levels.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RagRush">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- BOOT -->
+  <div id="boot-screen" class="screen active">
+    <div class="boot-content">
+      <div class="boot-logo"><span class="boot-rag">RAG</span><span class="boot-rush">RUSH</span></div>
+      <div class="boot-loader">
+        <div class="boot-bar"><div id="boot-progress" class="boot-fill"></div></div>
+        <div id="boot-text" class="boot-text">INITIALIZING</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="main-menu" class="screen">
+    <canvas id="menu-bg-canvas"></canvas>
+    <div class="menu-content">
+      <div class="logo-container">
+        <h1 class="game-logo">RAG<span class="logo-accent">RUSH</span></h1>
+        <div class="tagline">RAGDOLL &middot; OBSTACLE &middot; SURVIVAL</div>
+      </div>
+      <div class="menu-buttons">
+        <button id="btn-play" class="btn-main btn-primary"><svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>PLAY</button>
+        <button id="btn-trials" class="btn-main"><svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/><path d="M18 9v5a6 6 0 0 1-12 0V9"/></svg>TRIALS</button>
+        <button id="btn-characters" class="btn-main"><svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>CHARACTERS</button>
+        <button id="btn-settings" class="btn-main"><svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>SETTINGS</button>
+      </div>
+      <div class="menu-footer">
+        <div class="stat-badge"><svg class="stat-svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span id="total-stars" class="stat-num">0</span><span class="stat-of">/ 180</span></div>
+        <div class="stat-badge"><svg class="stat-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span id="levels-unlocked" class="stat-num">1</span><span class="stat-of">LEVELS</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL SELECT -->
+  <div id="level-select" class="screen">
+    <div class="screen-header">
+      <button id="ls-back" class="btn-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>BACK</button>
+      <h2 class="screen-title">SELECT LEVEL</h2>
+      <div class="star-total"><svg class="stat-svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span id="ls-stars">0</span><span class="stat-of">/ 180</span></div>
+    </div>
+    <div class="trial-tabs" id="trial-tabs"></div>
+    <div class="level-grid" id="level-grid"></div>
+  </div>
+
+  <!-- CHARACTER SELECT -->
+  <div id="char-select" class="screen">
+    <div class="screen-header">
+      <button id="cs-back" class="btn-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>BACK</button>
+      <h2 class="screen-title">CHARACTERS</h2>
+      <div></div>
+    </div>
+    <div class="char-layout">
+      <div class="char-list" id="char-list"></div>
+      <div class="char-preview">
+        <canvas id="char-canvas" width="200" height="300"></canvas>
+        <div class="char-info">
+          <h3 id="char-name" class="char-name">Runner</h3>
+          <p id="char-desc" class="char-desc">The default character.</p>
+          <div class="char-stats">
+            <div class="stat-row"><span class="stat-label">SPEED</span><div class="stat-bar"><div id="stat-speed" class="stat-fill speed-fill"></div></div></div>
+            <div class="stat-row"><span class="stat-label">JUMP</span><div class="stat-bar"><div id="stat-jump" class="stat-fill jump-fill"></div></div></div>
+            <div class="stat-row"><span class="stat-label">RESIST</span><div class="stat-bar"><div id="stat-resist" class="stat-fill resist-fill"></div></div></div>
+          </div>
+          <div id="char-unlock-info" class="char-unlock-info"></div>
+          <button id="btn-select-char" class="btn-main btn-primary btn-full">SELECT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settings-screen" class="screen">
+    <div class="screen-header">
+      <button id="set-back" class="btn-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>BACK</button>
+      <h2 class="screen-title">SETTINGS</h2>
+      <div></div>
+    </div>
+    <div class="settings-panel">
+      <div class="setting-group">
+        <h4 class="setting-group-title">AUDIO</h4>
+        <div class="setting-row"><label>Sound Effects</label><input type="range" id="sfx-vol" min="0" max="100" value="80"><span id="sfx-val" class="range-val">80%</span></div>
+        <div class="setting-row"><label>Music</label><input type="range" id="music-vol" min="0" max="100" value="60"><span id="music-val" class="range-val">60%</span></div>
+      </div>
+      <div class="setting-group">
+        <h4 class="setting-group-title">DISPLAY</h4>
+        <div class="setting-row"><label>Screen Shake</label><label class="toggle"><input type="checkbox" id="shake-toggle" checked><span class="toggle-slider"></span></label></div>
+        <div class="setting-row"><label>FPS Counter</label><label class="toggle"><input type="checkbox" id="fps-toggle"><span class="toggle-slider"></span></label></div>
+      </div>
+      <div class="setting-group">
+        <h4 class="setting-group-title">DATA</h4>
+        <button id="btn-reset-save" class="btn-danger">RESET ALL PROGRESS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY -->
+  <div id="gameplay-screen" class="screen">
+    <canvas id="game-canvas"></canvas>
+    <div id="game-hud" class="game-hud">
+      <div class="hud-left">
+        <div class="hud-level"><span class="hl-label">LVL</span><span id="hud-level-num" class="hl-num">1</span></div>
+        <div class="hud-timer" id="hud-timer">00:00.00</div>
+      </div>
+      <div class="hud-center">
+        <div class="hud-hp-bar">
+          <div class="hud-hp-bg">
+            <div id="hud-health-fill" class="hud-hp-fill"></div>
+            <div class="hud-hp-segments"></div>
+          </div>
+          <span id="hud-health-text" class="hud-hp-val">100</span>
+        </div>
+        <!-- Premium body silhouette indicator -->
+        <canvas id="hud-body-canvas" width="60" height="50"></canvas>
+      </div>
+      <div class="hud-right">
+        <button id="btn-fullscreen" class="btn-icon-circle" aria-label="Fullscreen" title="Toggle Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+        <button id="btn-pause" class="btn-icon-circle" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button>
+      </div>
+    </div>
+
+    <!-- PAUSE -->
+    <div id="pause-overlay" class="overlay hidden">
+      <div class="overlay-panel">
+        <h2 class="overlay-title">PAUSED</h2>
+        <div class="overlay-buttons">
+          <button id="btn-resume" class="btn-main btn-primary btn-full">RESUME</button>
+          <button id="btn-restart" class="btn-main btn-full">RESTART</button>
+          <button id="btn-quit" class="btn-main btn-full">QUIT TO MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVEL COMPLETE -->
+    <div id="complete-overlay" class="overlay hidden">
+      <div class="overlay-panel panel-complete">
+        <h2 class="overlay-title title-success">LEVEL COMPLETE</h2>
+        <div class="stars-display" id="stars-display">
+          <div class="star-slot" data-i="0"><svg viewBox="0 0 24 24" width="40" height="40"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="star-slot" data-i="1"><svg viewBox="0 0 24 24" width="40" height="40"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="star-slot" data-i="2"><svg viewBox="0 0 24 24" width="40" height="40"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        </div>
+        <div class="result-stats">
+          <div class="rs-row"><span>TIME</span><span id="comp-time">00:00</span></div>
+          <div class="rs-row"><span>BEST</span><span id="comp-best">--:--</span></div>
+          <div class="rs-row"><span>LIMBS LOST</span><span id="comp-limbs">0</span></div>
+        </div>
+        <div class="overlay-buttons">
+          <button id="btn-next" class="btn-main btn-primary btn-full">NEXT LEVEL</button>
+          <button id="btn-replay" class="btn-main btn-full">REPLAY</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVEL FAILED -->
+    <div id="failed-overlay" class="overlay hidden">
+      <div class="overlay-panel panel-failed">
+        <h2 class="overlay-title title-fail">WASTED</h2>
+        <p id="fail-reason" class="fail-reason">Torso destroyed</p>
+        <div class="overlay-buttons">
+          <button id="btn-retry" class="btn-main btn-primary btn-full">RETRY</button>
+          <button id="btn-fail-quit" class="btn-main btn-full">QUIT TO MENU</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE CONTROLS -->
+  <div id="mobile-controls" class="mobile-controls hidden">
+    <div id="m-left" class="m-btn m-left"><svg viewBox="0 0 24 24" width="20" height="20"><polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="3" fill="none"/></svg></div>
+    <div id="m-right" class="m-btn m-right"><svg viewBox="0 0 24 24" width="20" height="20"><polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="3" fill="none"/></svg></div>
+    <div id="m-jump" class="m-btn m-jump"><svg viewBox="0 0 24 24" width="20" height="20"><polyline points="18 15 12 9 6 15" stroke="currentColor" stroke-width="3" fill="none"/></svg></div>
+    <div id="m-crouch" class="m-btn m-crouch"><svg viewBox="0 0 24 24" width="20" height="20"><polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="3" fill="none"/></svg></div>
+  </div>
+
+  <div id="fps-counter" class="fps-counter hidden">60 FPS</div>
+
+  <script src="engine.js"></script>
+  <script src="player.js"></script>
+  <script src="levels.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
