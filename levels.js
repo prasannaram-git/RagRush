@@ -356,10 +356,10 @@ function generateLevel(levelId) {
     solids.push(new PhysicsBody(0, curY, 180, 120, true));
     curX = 180;
 
-    // Each level within a trial has slightly more segments and density
-    // Level 1 of a trial = introduction, Level 6 = boss gauntlet
-    const segBase = 4 + trialIdx + localLvl;
-    const segCount = Math.min(20, segBase);
+    // Each level within a trial has more segments as you progress
+    // MINIMUM 8 segments so even Level 1 feels substantial
+    const segBase = 8 + trialIdx + localLvl * 2;
+    const segCount = Math.min(24, segBase);
 
     // Create a plan for the level: ordered list of segment types
     const plan = createLevelPlan(trialIdx, localLvl, diff, srand, segCount, theme);
@@ -442,31 +442,36 @@ function generateLevel(levelId) {
 function createLevelPlan(trialIdx, localLvl, diff, srand, segCount, theme) {
     const plan = [];
 
-    // Ensure the first segment of each trial's first level is gentle
+    // First segment is always a gentle intro with 1 obstacle
     if (localLvl === 0) {
-        plan.push({ type: 'flat', obstacles: 'few' });
-        plan.push({ type: 'flat', obstacles: 'intro' });
+        plan.push({ type: 'flat', obstacles: 'moderate' });
     }
 
     for (let i = plan.length; i < segCount; i++) {
         const progress = i / segCount;
         const roll = srand();
 
-        // REST segments every 4-5 obstacles to give the player breathing room
-        if (i > 0 && i % (5 - Math.min(3, Math.floor(diff / 3))) === 0 && progress < 0.85) {
+        // REST segments every 5-6 obstacles to give breathing room
+        if (i > 2 && i % (6 - Math.min(3, Math.floor(diff / 3))) === 0 && progress < 0.85) {
             plan.push({ type: 'rest' });
             continue;
         }
 
-        // Last 20% of level should be intense
-        const isClimax = progress > 0.8;
+        // Last 25% of level should be intense
+        const isClimax = progress > 0.75;
 
         // Theme-based terrain selection
         switch (theme.terrain) {
             case 'gentle':
-                if (roll < 0.55) plan.push({ type: 'flat', obstacles: isClimax ? 'moderate' : 'few' });
-                else if (roll < 0.75) plan.push({ type: 'climb', height: 'low' });
-                else plan.push({ type: 'drop', height: 'low' });
+                // Even gentle levels need variety! Gaps, stairs, moving platforms
+                if (roll < 0.22) plan.push({ type: 'flat', obstacles: isClimax ? 'heavy' : 'moderate' });
+                else if (roll < 0.35) plan.push({ type: 'climb', height: 'medium' });
+                else if (roll < 0.48) plan.push({ type: 'drop', height: 'medium' });
+                else if (roll < 0.58) plan.push({ type: 'gap', width: 'short' });
+                else if (roll < 0.68) plan.push({ type: 'stairUp', steps: 2 });
+                else if (roll < 0.78) plan.push({ type: 'stairDown', steps: 2 });
+                else if (roll < 0.88) plan.push({ type: 'movingBridge' });
+                else plan.push({ type: isClimax ? 'spikeGauntlet' : 'valley' });
                 break;
 
             case 'mixed':
@@ -546,18 +551,19 @@ function createLevelPlan(trialIdx, localLvl, diff, srand, segCount, theme) {
 // ============================================================================
 
 function buildFlat(solids, obstacles, curX, curY, seg, diff, progress, srand) {
-    const w = 120 + Math.floor(srand() * 100);
+    const w = 140 + Math.floor(srand() * 120);
     solids.push(new PhysicsBody(curX, curY, w, 120, true));
 
     const density = seg.obstacles || 'moderate';
-    const count = density === 'few' ? (srand() < 0.5 ? 0 : 1)
-        : density === 'intro' ? 1
-            : density === 'moderate' ? 1 + Math.floor(srand() * 2)
-                : density === 'heavy' ? 2 + Math.floor(srand() * 2)
-                    : 3 + Math.floor(srand() * 2); // extreme
+    const count = density === 'few' ? 1
+        : density === 'intro' ? 1 + Math.floor(srand() * 2)
+            : density === 'moderate' ? 2 + Math.floor(srand() * 2)
+                : density === 'heavy' ? 3 + Math.floor(srand() * 2)
+                    : 4 + Math.floor(srand() * 2); // extreme
 
     for (let i = 0; i < count; i++) {
-        const ox = curX + 20 + Math.floor(srand() * Math.max(10, w - 50));
+        const spacing = w / (count + 1);
+        const ox = curX + spacing * (i + 1) + Math.floor((srand() - 0.5) * 20);
         placeObstacle(obstacles, pickObsType(srand, diff, progress), ox, curY, diff, srand);
     }
 
@@ -920,26 +926,27 @@ function placeObstacle(obstacles, type, ox, surfaceY, diff, srand) {
 function pickObsType(srand, diff, progress) {
     const w = [];
 
-    // Core obstacles (always available, weighted down as new ones unlock)
-    w.push({ t: 'spike', wt: diff <= 2 ? 5 : diff <= 5 ? 3 : 2 });
+    // ALL obstacle types available from diff 1 but with different weights
+    // This keeps even early levels interesting with variety
+    w.push({ t: 'spike', wt: diff <= 2 ? 3 : 2 });
+    w.push({ t: 'spike_row', wt: diff <= 2 ? 1.5 : 2 });
+    w.push({ t: 'saw_static', wt: 2 }); // Saws from level 1!
+    w.push({ t: 'saw_moving', wt: diff <= 2 ? 1 : 2.5 }); // Slow saws from level 1
+    w.push({ t: 'hammer', wt: diff <= 2 ? 1 : 2 }); // Slow hammers from level 1
 
-    // Gradually unlock obstacle types
-    if (diff >= 2) w.push({ t: 'spike_row', wt: 2 });
-    if (diff >= 2) w.push({ t: 'saw_static', wt: 2 });
-    if (diff >= 3) w.push({ t: 'saw_moving', wt: 2.5 });
-    if (diff >= 3) w.push({ t: 'hammer', wt: 1.5 });
-    if (diff >= 4) w.push({ t: 'barrel', wt: 1.5 });
-    if (diff >= 4) w.push({ t: 'saw_vertical', wt: 1.5 });
-    if (diff >= 5) w.push({ t: 'falling_trap', wt: 2 });
-    if (diff >= 5) w.push({ t: 'pendulum', wt: 2 });
-    if (diff >= 6) w.push({ t: 'laser', wt: 2.5 });
-    if (diff >= 7) w.push({ t: 'crusher', wt: 2 });
+    // These unlock progressively
+    if (diff >= 2) w.push({ t: 'barrel', wt: 1.5 });
+    if (diff >= 2) w.push({ t: 'saw_vertical', wt: 1.5 });
+    if (diff >= 3) w.push({ t: 'falling_trap', wt: 2 });
+    if (diff >= 3) w.push({ t: 'pendulum', wt: 2 });
+    if (diff >= 4) w.push({ t: 'laser', wt: 2.5 });
+    if (diff >= 5) w.push({ t: 'crusher', wt: 2 });
 
     // Climax of level gets more dangerous obstacles
-    if (progress > 0.7) {
-        if (diff >= 3) w.push({ t: 'saw_moving', wt: 1.5 });
-        if (diff >= 5) w.push({ t: 'pendulum', wt: 1 });
-        if (diff >= 6) w.push({ t: 'crusher', wt: 1 });
+    if (progress > 0.65) {
+        w.push({ t: 'saw_moving', wt: 1.5 });
+        if (diff >= 3) w.push({ t: 'pendulum', wt: 1 });
+        if (diff >= 4) w.push({ t: 'crusher', wt: 1 });
     }
 
     const total = w.reduce((s, e) => s + e.wt, 0);
